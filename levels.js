@@ -6,6 +6,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DATA_PATH = path.join(__dirname, "data", "levels.json");
+const COOLDOWN_MS = 60 * 1000;
+
+// tracks the last time each user earned XP: userId -> timestamp
+const cooldowns = new Map();
 
 export function readData() {
   const raw = fs.readFileSync(DATA_PATH, "utf-8");
@@ -17,6 +21,15 @@ function writeData(data) {
 }
 
 export function addXp(userId, amount) {
+  const now = Date.now();
+  const lastEarned = cooldowns.get(userId) || 0;
+
+  if (now - lastEarned < COOLDOWN_MS) {
+    return { onCooldown: true };
+  }
+
+  cooldowns.set(userId, now);
+
   const data = readData();
 
   if (!data[userId]) {
@@ -36,5 +49,5 @@ export function addXp(userId, amount) {
 
   writeData(data);
 
-  return { level: data[userId].level, leveledUp };
+  return { level: data[userId].level, leveledUp, onCooldown: false };
 }

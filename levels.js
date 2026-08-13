@@ -60,7 +60,7 @@ function addXp(userId, amount) {
     leveledUp = true;
   }
 
-  updateUserStmt.run(user.xp, user.level, userId);
+  updateUserStatement.run(user.xp, user.level, userId);
 
   return { level: user.level, leveledUp, onCooldown: false };
 }

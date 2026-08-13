@@ -24,6 +24,7 @@ client.on("interactionCreate", async (interaction) => {
     switch (commandName) {
       case PING:
         await interaction.reply("Pong!");
+        break;
       case HELP:
         await interaction.reply(
           "Here are my commands:\n" +
@@ -31,17 +32,20 @@ client.on("interactionCreate", async (interaction) => {
             "`/rank` — check your level\n" +
             "`/say` — make me say something",
         );
-      case RANK:
+        break;
+      case RANK: {
         const data = readData();
         const userData = data[interaction.user.id] || { xp: 0, level: 1 };
         await interaction.reply(
           `You're level **${userData.level}** with **${userData.xp} XP**.`,
         );
+        break;
+      }
       case SAY:
-        const text = interaction.options.getString("text");
-        await interaction.reply(text);
+        await interaction.reply(interaction.options.getString("text"));
+        break;
       default:
-        await interaction.reply("Unkown command!");
+        await interaction.reply("Unknown command!");
     }
   } catch (e) {
     console.log("Error:", e);
@@ -49,6 +53,20 @@ client.on("interactionCreate", async (interaction) => {
       content: "Something went wrong running that command.",
       ephemeral: true,
     });
+  }
+});
+
+client.on("messageCreate", async (message) => {
+  if (message.author.bot) {
+    return;
+  }
+
+  const result = addXp(message.author.id, 15);
+
+  if (result.leveledUp) {
+    await message.channel.send(
+      `Congrats <@${message.author.id}>, you're now level **${result.level}**!`,
+    );
   }
 });
 

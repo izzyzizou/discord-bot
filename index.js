@@ -44,7 +44,7 @@ client.on("interactionCreate", async (interaction) => {
         await interaction.reply("Unkown command!");
     }
   } catch (e) {
-    console.log("Error:", error);
+    console.log("Error:", e);
     await interaction.reply({
       content: "Something went wrong running that command.",
       ephemeral: true,

@@ -1,9 +1,9 @@
 import "dotenv/config";
-import { Client, GatewayIntentBits } from "discord.js";
-import { addXp, readData } from "./levels.js";
+import { Client, GatewayIntentBits, InteractionType } from "discord.js";
+import { addXp, readData, getLeaderboard } from "./levels.js";
 import { COMMANDS } from "./enums.js";
 
-const { PING, HELP, SAY, RANK } = COMMANDS;
+const { PING, HELP, SAY, RANK, LEADERBOARD } = COMMANDS;
 
 const client = new Client({
   intents: [
@@ -21,38 +21,57 @@ client.on("interactionCreate", async (interaction) => {
   const { commandName } = interaction;
 
   try {
+    await interaction.deferReply();
+
     switch (commandName) {
       case PING:
-        await interaction.reply("Pong!");
+        await interaction.editReply("Pong!");
         break;
       case HELP:
-        await interaction.reply(
+        await interaction.editReply(
           "Here are my commands:\n" +
             "`/ping` — check if I'm alive\n" +
             "`/rank` — check your level\n" +
+            "`/leaderboard` — see top users\n" +
             "`/say` — make me say something",
         );
         break;
       case RANK: {
         const data = readData();
         const userData = data[interaction.user.id] || { xp: 0, level: 1 };
-        await interaction.reply(
+        await interaction.editReply(
           `You're level **${userData.level}** with **${userData.xp} XP**.`,
         );
         break;
       }
+      case LEADERBOARD: {
+        const top = getLeaderboard();
+        if (top.length === 0) {
+          await interaction.editReply("No users have earned XP yet.");
+          break;
+        }
+        const lines = top.map(
+          (row, i) =>
+            `${i + 1}. <@${row.user_id}> — Level **${row.level}** (${row.xp} XP)`,
+        );
+        await interaction.editReply("**Leaderboard**\n" + lines.join("\n"));
+        break;
+      }
       case SAY:
-        await interaction.reply(interaction.options.getString("text"));
+        await interaction.editReply(interaction.options.getString("text"));
         break;
       default:
-        await interaction.reply("Unknown command!");
+        await interaction.editReply("Unknown command!");
     }
   } catch (e) {
     console.log("Error:", e);
-    await interaction.reply({
-      content: "Something went wrong running that command.",
-      ephemeral: true,
-    });
+    try {
+      await interaction.editReply({
+        content: "Something went wrong running that command.",
+      });
+    } catch (replyError) {
+      console.log("Failed to edit reply:", replyError);
+    }
   }
 });
 

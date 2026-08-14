@@ -15,6 +15,10 @@ const commands = [
     .setDescription('Check your level and XP'),
 
   new SlashCommandBuilder()
+    .setName('leaderboard')
+    .setDescription('See the top users by level and XP'),
+
+  new SlashCommandBuilder()
     .setName('say')
     .setDescription('Make the bot say something')
     .addStringOption(option =>

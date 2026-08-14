@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const db = new Database(path.join(__dirname, "data", "levels.db"));
-const COOLDOWN_MS = 60 * 1000;
+const COOLDOWN_MS = 10 * 1000;
 
 // create the table if it doesn't exist yet - safe to run every startup
 db.exec(`CREATE TABLE IF NOT EXISTS levels (
@@ -74,4 +74,10 @@ function readData() {
   return data;
 }
 
-export { addXp, readData };
+function getLeaderboard() {
+  return db
+    .prepare("SELECT user_id, xp, level FROM levels ORDER BY xp DESC LIMIT 10")
+    .all();
+}
+
+export { addXp, readData, getLeaderboard };

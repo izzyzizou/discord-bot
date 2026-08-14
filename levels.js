@@ -5,7 +5,8 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const db = new Database(path.join(__dirname, "data", "levels.db"));
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'data', 'levels.db');
+const db = new Database(dbPath);
 const COOLDOWN_MS = 10 * 1000;
 
 // create the table if it doesn't exist yet - safe to run every startup
